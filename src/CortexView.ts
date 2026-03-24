@@ -58,6 +58,8 @@ export class CortexView extends ItemView {
 
   private buildUI(): void {
     this.contentEl.empty();
+    // Prevent Obsidian's contentEl from scrolling — only our list should scroll
+    this.contentEl.style.overflow = "hidden";
     this.rootEl = this.contentEl.createDiv({ cls: "cortex-container" });
     if (Platform.isMobile) {
       this.rootEl.addClass("cortex-mobile");
