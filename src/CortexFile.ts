@@ -18,7 +18,7 @@ export function parseItems(content: string): CortexItem[] {
   const items: CortexItem[] = [];
 
   for (let i = 0; i < lines.length; i++) {
-    const match = CHECKBOX_RE.exec(lines[i]);
+    const match = lines[i].match(CHECKBOX_RE);
     if (!match) continue;
 
     const checked = match[1] === "x" || match[1] === "X";
@@ -63,9 +63,10 @@ export function toggleLine(content: string, lineIndex: number): string {
   if (lineIndex < 0 || lineIndex >= lines.length) return content;
 
   const line = lines[lineIndex];
-  if (!CHECKBOX_RE.test(line)) return content;
+  const match = line.match(CHECKBOX_RE);
+  if (!match) return content;
 
-  if (line.includes("- [ ] ")) {
+  if (match[1] === " ") {
     lines[lineIndex] = line.replace("- [ ] ", "- [x] ");
   } else {
     lines[lineIndex] = line.replace(/- \[[xX]\] /, "- [ ] ");
