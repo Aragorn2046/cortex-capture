@@ -12,18 +12,20 @@
 
 body.is-mobile .cortex-container {
   flex-direction: column;
-  justify-content: center;
-  padding: 4px 4px calc(env(safe-area-inset-bottom, 0px) + 60px) 4px;
+  justify-content: flex-end;
+  padding: 4px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 60px);
 }
 
 body.is-mobile .cortex-input-area {
   order: 2;
+  flex-shrink: 0;
 }
 
 body.is-mobile .cortex-list {
   order: 1;
   flex: 0 1 auto;
-  max-height: 45vh;
+  max-height: 50vh;
   overflow-y: auto;
 }
 
