@@ -6,26 +6,82 @@ export interface CortexItem {
   raw: string;
 }
 
-/** Parse a markdown file string into an array of CortexItem objects. */
+const CHECKBOX_RE = /^\s*- \[([ xX])\] (.*)$/;
+const IMAGE_EMBED_RE = /!\[\[([^\]]+)\]\]/g;
+
+/** Parse a markdown file string into an array of CortexItem objects.
+ *  Non-checkbox lines are skipped but their positions count toward line indices. */
 export function parseItems(content: string): CortexItem[] {
-  // Implemented in section-02
-  return [];
+  if (!content.trim()) return [];
+
+  const lines = content.split("\n");
+  const items: CortexItem[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const match = CHECKBOX_RE.exec(lines[i]);
+    if (!match) continue;
+
+    const checked = match[1] === "x" || match[1] === "X";
+    const text = match[2].trimEnd();
+    const images: string[] = [];
+
+    let imgMatch: RegExpExecArray | null;
+    const imgRe = new RegExp(IMAGE_EMBED_RE.source, "g");
+    while ((imgMatch = imgRe.exec(text)) !== null) {
+      images.push(imgMatch[1]);
+    }
+
+    items.push({
+      line: i,
+      checked,
+      text,
+      images,
+      raw: lines[i],
+    });
+  }
+
+  return items;
 }
 
-/** Return new file content with a new checkbox item prepended. */
-export function prependItem(
-  content: string,
+/** Build a single checkbox line string for prepending. */
+export function buildPrependLine(
   text: string,
   imageEmbed: string,
   showTimestamp: boolean,
-  timestampFormat: string
+  timestamp: string
 ): string {
-  // Implemented in section-02
-  return content;
+  const cleanText = text.replace(/[\n\r]/g, " ");
+  const timestampPart = showTimestamp && timestamp ? `[${timestamp}] ` : "";
+  const parts = [cleanText, imageEmbed].filter(Boolean);
+  return `- [ ] ${timestampPart}${parts.join(" ")}`;
 }
 
-/** Return new file content with the checkbox at lineIndex toggled. */
-export function toggleItem(content: string, lineIndex: number): string {
-  // Implemented in section-02
-  return content;
+/** Return new content with the checkbox at lineIndex toggled.
+ *  Returns content unchanged if lineIndex is invalid or line is not a checkbox. */
+export function toggleLine(content: string, lineIndex: number): string {
+  const lines = content.split("\n");
+  if (lineIndex < 0 || lineIndex >= lines.length) return content;
+
+  const line = lines[lineIndex];
+  if (!CHECKBOX_RE.test(line)) return content;
+
+  if (line.includes("- [ ] ")) {
+    lines[lineIndex] = line.replace("- [ ] ", "- [x] ");
+  } else {
+    lines[lineIndex] = line.replace(/- \[[xX]\] /, "- [ ] ");
+  }
+
+  return lines.join("\n");
+}
+
+/** Format a Date using simple token replacement. Tokens: YYYY, MM, DD, HH, mm, ss. */
+export function formatTimestamp(date: Date, format: string): string {
+  const pad = (n: number) => n.toString().padStart(2, "0");
+  return format
+    .replace("YYYY", date.getFullYear().toString())
+    .replace("MM", pad(date.getMonth() + 1))
+    .replace("DD", pad(date.getDate()))
+    .replace("HH", pad(date.getHours()))
+    .replace("mm", pad(date.getMinutes()))
+    .replace("ss", pad(date.getSeconds()));
 }
