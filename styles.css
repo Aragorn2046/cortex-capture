@@ -13,8 +13,10 @@
 body.is-mobile .cortex-container {
   flex-direction: column;
   justify-content: flex-end;
+  overflow: hidden;
   padding: 4px;
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 60px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 48px);
+  /* height set dynamically by JS via visualViewport API */
 }
 
 body.is-mobile .cortex-input-area {
@@ -24,8 +26,8 @@ body.is-mobile .cortex-input-area {
 
 body.is-mobile .cortex-list {
   order: 1;
-  flex: 0 1 auto;
-  max-height: 50vh;
+  flex: 1 1 auto;
+  min-height: 0;
   overflow-y: auto;
 }
 

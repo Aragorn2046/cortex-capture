@@ -10,6 +10,7 @@ export class CortexView extends ItemView {
   private imageHandler!: ImageHandler;
 
   // DOM refs
+  private rootEl!: HTMLDivElement;
   private textarea!: HTMLTextAreaElement;
   private imagePreviewEl!: HTMLDivElement;
   private listEl!: HTMLDivElement;
@@ -17,6 +18,7 @@ export class CortexView extends ItemView {
   // State
   private ignoreNextModify = false;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
+  private viewportHandler: (() => void) | null = null;
 
   constructor(
     leaf: WorkspaceLeaf,
@@ -48,6 +50,7 @@ export class CortexView extends ItemView {
 
   async onClose(): Promise<void> {
     if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    if (this.viewportHandler) this.viewportHandler();
     this.contentEl.empty();
   }
 
@@ -55,11 +58,36 @@ export class CortexView extends ItemView {
 
   private buildUI(): void {
     this.contentEl.empty();
-    const container = this.contentEl.createDiv({ cls: "cortex-container" });
-    if (Platform.isMobile) container.addClass("cortex-mobile");
+    this.rootEl = this.contentEl.createDiv({ cls: "cortex-container" });
+    if (Platform.isMobile) {
+      this.rootEl.addClass("cortex-mobile");
+      this.setupMobileViewport();
+    }
 
-    this.buildInputArea(container);
-    this.listEl = container.createDiv({ cls: "cortex-list", attr: { role: "list" } });
+    this.buildInputArea(this.rootEl);
+    this.listEl = this.rootEl.createDiv({ cls: "cortex-list", attr: { role: "list" } });
+  }
+
+  /** On mobile, resize container to match visual viewport (handles keyboard). */
+  private setupMobileViewport(): void {
+    const vv = window.visualViewport;
+    if (!vv) return;
+
+    const update = () => {
+      // Set container height to exactly the visual viewport height,
+      // offset by the viewport's top position to account for Obsidian's UI.
+      const height = vv.height;
+      this.rootEl.style.height = `${height}px`;
+      this.rootEl.style.maxHeight = `${height}px`;
+    };
+
+    update();
+    vv.addEventListener("resize", update);
+    vv.addEventListener("scroll", update);
+    this.viewportHandler = () => {
+      vv.removeEventListener("resize", update);
+      vv.removeEventListener("scroll", update);
+    };
   }
 
   private buildInputArea(container: HTMLElement): void {
