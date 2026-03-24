@@ -3,7 +3,8 @@
   "name": "Cortex 2.0",
   "version": "1.0.0",
   "minAppVersion": "1.5.7",
-  "description": "Quick capture checklist with image support",
+  "description": "Quick-capture checklist view with image support, mobile-first design, and URI handler for Android automation",
   "author": "Aragorn Meulendijks",
+  "authorUrl": "https://github.com/Aragorn2046",
   "isDesktopOnly": false
 }

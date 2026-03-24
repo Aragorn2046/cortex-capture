@@ -5,3 +5,4 @@ main.js
 *.credentials*
 *.secret*
 *.token*.json
+implementation/
