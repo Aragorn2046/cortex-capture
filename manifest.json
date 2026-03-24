@@ -1,0 +1,9 @@
+{
+  "id": "cortex-capture",
+  "name": "Cortex 2.0",
+  "version": "1.0.0",
+  "minAppVersion": "1.5.7",
+  "description": "Quick capture checklist with image support",
+  "author": "Aragorn Meulendijks",
+  "isDesktopOnly": false
+}
