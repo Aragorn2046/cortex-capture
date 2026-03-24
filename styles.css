@@ -1,1 +1,218 @@
-/* Cortex 2.0 styles — implemented in section-06 */
+/* Cortex 2.0 — Obsidian Plugin Styles */
+
+/* ── Container ── */
+
+.cortex-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 8px;
+  gap: 8px;
+}
+
+body.is-mobile .cortex-container {
+  flex-direction: column-reverse;
+  padding: 4px;
+}
+
+/* ── Input Area ── */
+
+.cortex-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 8px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 8px;
+  background: var(--background-secondary);
+  flex-shrink: 0;
+}
+
+.cortex-textarea {
+  width: 100%;
+  min-height: 2.5em;
+  resize: none;
+  overflow: hidden;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-normal);
+  background: var(--background-primary);
+  box-sizing: border-box;
+}
+
+.cortex-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.cortex-textarea:focus {
+  outline: none;
+  border-color: var(--interactive-accent);
+}
+
+/* ── Button Row ── */
+
+.cortex-btn-row {
+  display: flex;
+  gap: 6px;
+}
+
+.cortex-submit-btn {
+  flex: 1;
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.cortex-submit-btn:hover {
+  opacity: 0.9;
+}
+
+.cortex-image-btn {
+  padding: 6px 12px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 6px;
+  background: var(--background-primary);
+  color: var(--text-normal);
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.cortex-image-btn:hover {
+  background: var(--background-modifier-hover);
+}
+
+body.is-mobile .cortex-submit-btn,
+body.is-mobile .cortex-image-btn {
+  min-height: 44px;
+  font-size: 16px;
+}
+
+/* ── Image Preview (input area) ── */
+
+.cortex-image-preview {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.cortex-preview-img {
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+
+.cortex-preview-remove {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: var(--background-modifier-border);
+  color: var(--text-normal);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cortex-preview-remove:hover {
+  background: var(--text-muted);
+  color: var(--background-primary);
+}
+
+/* ── Drag-over indicator ── */
+
+.cortex-drag-over {
+  outline: 2px dashed var(--interactive-accent);
+  outline-offset: -2px;
+}
+
+/* ── Checklist ── */
+
+.cortex-list {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+/* ── Checklist Item ── */
+
+.cortex-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.cortex-item:hover {
+  background: var(--background-modifier-hover);
+}
+
+.cortex-item input[type="checkbox"] {
+  margin-top: 3px;
+  flex-shrink: 0;
+  cursor: pointer;
+}
+
+body.is-mobile .cortex-item input[type="checkbox"] {
+  width: 22px;
+  height: 22px;
+  min-width: 44px;
+  min-height: 44px;
+  padding: 11px;
+  box-sizing: content-box;
+  margin: -11px;
+  margin-right: -3px;
+}
+
+.cortex-item-text {
+  flex: 1;
+  color: var(--text-normal);
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+/* ── Checked state ── */
+
+.cortex-item--checked .cortex-item-text {
+  text-decoration: line-through;
+  color: var(--text-muted);
+  opacity: 0.6;
+}
+
+/* ── Item Image Thumbnails ── */
+
+.cortex-item-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.cortex-thumb {
+  max-width: 200px;
+  max-height: 150px;
+  border-radius: 4px;
+  object-fit: cover;
+  cursor: pointer;
+  display: block;
+}
+
+body.is-mobile .cortex-thumb {
+  max-width: 150px;
+  max-height: 120px;
+}
