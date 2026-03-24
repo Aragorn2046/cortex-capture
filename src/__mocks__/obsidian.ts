@@ -13,5 +13,7 @@ export class ItemView {
   getDisplayText() { return ""; }
 }
 export class TFile {}
+export class WorkspaceLeaf {}
 export class PluginSettingTab {}
 export class Setting {}
+export const Platform = { isMobile: false };

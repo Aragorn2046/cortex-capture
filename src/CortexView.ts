@@ -110,13 +110,37 @@ export class CortexView extends ItemView {
       inputArea,
       this.imagePreviewEl,
       (el: HTMLElement, event: string, handler: (e: Event) => void) =>
-        this.registerDomEvent(el, event, handler)
+        this.registerDomEvent(el, event as keyof HTMLElementEventMap, handler as any)
     );
+  }
+
+  // --- Public API (used by URI handler in main.ts) ---
+
+  setInputText(text: string): void {
+    this.textarea.value = text;
+  }
+
+  async attachImageFromPath(filePath: string): Promise<void> {
+    // Read file from vault adapter, pass to image handler
+    const adapter = this.app.vault.adapter;
+    try {
+      const data = await adapter.readBinary(filePath);
+      const ext = filePath.split(".").pop() ?? "png";
+      const mimeMap: Record<string, string> = {
+        png: "image/png", jpg: "image/jpeg", jpeg: "image/jpeg",
+        gif: "image/gif", webp: "image/webp", heic: "image/heic",
+      };
+      const mime = mimeMap[ext.toLowerCase()] ?? "image/png";
+      const file = new File([data], filePath.split("/").pop() ?? "image.png", { type: mime });
+      await (this.imageHandler as any).handleFile(file);
+    } catch {
+      // Silently fail — URI handler is best-effort for images
+    }
   }
 
   // --- Submit ---
 
-  private async submitItem(): Promise<void> {
+  async submitItem(): Promise<void> {
     const settings = this.getSettings();
     const text = this.textarea.value.replace(/[\n\r]/g, " ").trim();
     const embed = this.imageHandler.getEmbed();
