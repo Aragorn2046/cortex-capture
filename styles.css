@@ -185,14 +185,14 @@ body.is-mobile .cortex-image-btn {
 }
 
 body.is-mobile .cortex-item input[type="checkbox"] {
-  width: 22px;
-  height: 22px;
-  min-width: 44px;
-  min-height: 44px;
-  padding: 11px;
-  box-sizing: content-box;
-  margin: -11px;
-  margin-right: -3px;
+  width: 20px;
+  height: 20px;
+  min-width: 20px;
+  min-height: 20px;
+  padding: 0;
+  margin: 2px 0 0 0;
+  flex-shrink: 0;
+  accent-color: var(--interactive-accent);
 }
 
 .cortex-item-text {
@@ -200,6 +200,111 @@ body.is-mobile .cortex-item input[type="checkbox"] {
   color: var(--text-normal);
   line-height: 1.5;
   word-break: break-word;
+}
+
+/* ── Delete Button ── */
+
+.cortex-item-delete {
+  flex-shrink: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: none;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.15s;
+  margin-top: 2px;
+}
+
+.cortex-item:hover .cortex-item-delete {
+  opacity: 1;
+}
+
+.cortex-item-delete:hover {
+  background: var(--background-modifier-error);
+  color: var(--text-on-accent);
+}
+
+body.is-mobile .cortex-item-delete {
+  opacity: 1;
+  min-width: 44px;
+  min-height: 44px;
+}
+
+/* ── Edit Mode ── */
+
+.cortex-edit-area {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cortex-edit-textarea {
+  width: 100%;
+  min-height: 2em;
+  resize: none;
+  border: 1px solid var(--interactive-accent);
+  border-radius: 4px;
+  padding: 4px 6px;
+  font-size: 14px;
+  font-family: inherit;
+  color: var(--text-normal);
+  background: var(--background-primary);
+  box-sizing: border-box;
+}
+
+.cortex-edit-textarea:focus {
+  outline: none;
+  box-shadow: 0 0 0 1px var(--interactive-accent);
+}
+
+.cortex-edit-btn-row {
+  display: flex;
+  gap: 4px;
+}
+
+.cortex-edit-save {
+  padding: 2px 10px;
+  border: none;
+  border-radius: 4px;
+  background: var(--interactive-accent);
+  color: var(--text-on-accent);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.cortex-edit-save:hover {
+  opacity: 0.9;
+}
+
+.cortex-edit-cancel {
+  padding: 2px 10px;
+  border: 1px solid var(--background-modifier-border);
+  border-radius: 4px;
+  background: var(--background-primary);
+  color: var(--text-muted);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.cortex-edit-cancel:hover {
+  background: var(--background-modifier-hover);
+}
+
+body.is-mobile .cortex-edit-save,
+body.is-mobile .cortex-edit-cancel {
+  min-height: 36px;
+  font-size: 14px;
+  padding: 4px 14px;
 }
 
 /* ── Checked state ── */

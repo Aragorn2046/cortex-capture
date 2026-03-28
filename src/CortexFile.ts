@@ -75,6 +75,50 @@ export function toggleLine(content: string, lineIndex: number): string {
   return lines.join("\n");
 }
 
+/** Return new content with the text of the checkbox at lineIndex replaced.
+ *  Preserves the checkbox state (checked/unchecked) and any image embeds.
+ *  Returns content unchanged if lineIndex is invalid or line is not a checkbox. */
+export function editLine(content: string, lineIndex: number, newText: string): string {
+  const lines = content.split("\n");
+  if (lineIndex < 0 || lineIndex >= lines.length) return content;
+
+  const line = lines[lineIndex];
+  const match = line.match(CHECKBOX_RE);
+  if (!match) return content;
+
+  const checkState = match[1];
+  const oldText = match[2];
+
+  // Extract image embeds from the old text to preserve them
+  const images: string[] = [];
+  const imgRe = new RegExp(IMAGE_EMBED_RE.source, "g");
+  let imgMatch: RegExpExecArray | null;
+  while ((imgMatch = imgRe.exec(oldText)) !== null) {
+    images.push(imgMatch[0]);
+  }
+
+  const cleanText = newText.replace(/[\n\r]/g, " ").trim();
+  const indent = line.match(/^(\s*)/)?.[1] ?? "";
+  const parts = [cleanText, ...images].filter(Boolean);
+  lines[lineIndex] = `${indent}- [${checkState}] ${parts.join(" ")}`;
+
+  return lines.join("\n");
+}
+
+/** Return new content with the line at lineIndex removed.
+ *  Returns content unchanged if lineIndex is invalid or line is not a checkbox. */
+export function deleteLine(content: string, lineIndex: number): string {
+  const lines = content.split("\n");
+  if (lineIndex < 0 || lineIndex >= lines.length) return content;
+
+  const line = lines[lineIndex];
+  const match = line.match(CHECKBOX_RE);
+  if (!match) return content;
+
+  lines.splice(lineIndex, 1);
+  return lines.join("\n");
+}
+
 /** Format a Date using simple token replacement. Tokens: YYYY, MM, DD, HH, mm, ss. */
 export function formatTimestamp(date: Date, format: string): string {
   const pad = (n: number) => n.toString().padStart(2, "0");

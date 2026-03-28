@@ -1,5 +1,5 @@
 import { ItemView, WorkspaceLeaf, TFile, Platform } from "obsidian";
-import { parseItems, buildPrependLine, toggleLine, formatTimestamp } from "./CortexFile";
+import { parseItems, buildPrependLine, toggleLine, editLine, deleteLine, formatTimestamp } from "./CortexFile";
 import type { CortexItem } from "./CortexFile";
 import { ImageHandler } from "./ImageHandler";
 import type { CortexSettings } from "./settings";
@@ -19,6 +19,7 @@ export class CortexView extends ItemView {
   private ignoreNextModify = false;
   private debounceTimer: ReturnType<typeof setTimeout> | null = null;
   private viewportHandler: (() => void) | null = null;
+  private editingLine: number | null = null;
 
   constructor(
     leaf: WorkspaceLeaf,
@@ -230,8 +231,44 @@ export class CortexView extends ItemView {
       this.toggleItem(item.line);
     });
 
-    const textSpan = div.createSpan({ cls: "cortex-item-text" });
-    this.renderInlineMarkdown(item.text, textSpan);
+    if (this.editingLine === item.line) {
+      // Edit mode: show textarea instead of text
+      this.renderEditMode(div, item);
+    } else {
+      // Display mode: show text with click-to-edit
+      const textSpan = div.createSpan({ cls: "cortex-item-text" });
+      this.renderInlineMarkdown(item.text, textSpan);
+      if (Platform.isMobile) {
+        // Long-press to edit on mobile
+        let pressTimer: ReturnType<typeof setTimeout> | null = null;
+        this.registerDomEvent(textSpan, "touchstart", () => {
+          pressTimer = setTimeout(() => {
+            this.enterEditMode(item.line);
+          }, 500);
+        });
+        this.registerDomEvent(textSpan, "touchend", () => {
+          if (pressTimer) clearTimeout(pressTimer);
+        });
+        this.registerDomEvent(textSpan, "touchmove", () => {
+          if (pressTimer) clearTimeout(pressTimer);
+        });
+      } else {
+        this.registerDomEvent(textSpan, "dblclick", () => {
+          this.enterEditMode(item.line);
+        });
+      }
+
+      // Delete button (visible on hover via CSS)
+      const deleteBtn = div.createEl("button", {
+        cls: "cortex-item-delete",
+        attr: { "aria-label": "Delete item" },
+      });
+      deleteBtn.textContent = "\u00D7";
+      this.registerDomEvent(deleteBtn, "click", (e: MouseEvent) => {
+        e.stopPropagation();
+        this.deleteItem(item.line);
+      });
+    }
 
     if (item.images.length > 0) {
       const imgContainer = div.createDiv({ cls: "cortex-item-images" });
@@ -242,6 +279,95 @@ export class CortexView extends ItemView {
     }
 
     return div;
+  }
+
+  private renderEditMode(container: HTMLElement, item: CortexItem): void {
+    // Strip image embeds from displayed text for editing
+    const editableText = item.text.replace(/!\[\[[^\]]+\]\]/g, "").trim();
+
+    const editArea = container.createDiv({ cls: "cortex-edit-area" });
+    const editTextarea = editArea.createEl("textarea", {
+      cls: "cortex-edit-textarea",
+      attr: { rows: "2" },
+    });
+    editTextarea.value = editableText;
+
+    const btnRow = editArea.createDiv({ cls: "cortex-edit-btn-row" });
+    const saveBtn = btnRow.createEl("button", {
+      cls: "cortex-edit-save",
+      text: "Save",
+    });
+    const cancelBtn = btnRow.createEl("button", {
+      cls: "cortex-edit-cancel",
+      text: "Cancel",
+    });
+
+    const save = () => {
+      const newText = editTextarea.value.replace(/[\n\r]/g, " ").trim();
+      this.editingLine = null;
+      if (newText !== editableText) {
+        this.saveEdit(item.line, newText);
+      } else {
+        this.refreshChecklist();
+      }
+    };
+
+    const cancel = () => {
+      this.editingLine = null;
+      this.refreshChecklist();
+    };
+
+    this.registerDomEvent(editTextarea, "keydown", (e: KeyboardEvent) => {
+      if (e.key === "Enter" && !e.shiftKey) {
+        e.preventDefault();
+        save();
+      } else if (e.key === "Escape") {
+        e.preventDefault();
+        cancel();
+      }
+    });
+
+    this.registerDomEvent(saveBtn, "click", () => save());
+    this.registerDomEvent(cancelBtn, "click", () => cancel());
+
+    // Focus and select text after render
+    setTimeout(() => {
+      editTextarea.focus();
+      editTextarea.select();
+    }, 0);
+  }
+
+  private enterEditMode(lineIndex: number): void {
+    this.editingLine = lineIndex;
+    this.refreshChecklist();
+  }
+
+  private async saveEdit(lineIndex: number, newText: string): Promise<void> {
+    const settings = this.getSettings();
+    this.ignoreNextModify = true;
+
+    const file = this.app.vault.getAbstractFileByPath(settings.captureFile);
+    if (file instanceof TFile) {
+      await this.app.vault.process(file, (content) => {
+        return editLine(content, lineIndex, newText);
+      });
+    }
+
+    await this.refreshChecklist();
+  }
+
+  private async deleteItem(lineIndex: number): Promise<void> {
+    const settings = this.getSettings();
+    this.ignoreNextModify = true;
+
+    const file = this.app.vault.getAbstractFileByPath(settings.captureFile);
+    if (file instanceof TFile) {
+      await this.app.vault.process(file, (content) => {
+        return deleteLine(content, lineIndex);
+      });
+    }
+
+    await this.refreshChecklist();
   }
 
   /** Render simple inline markdown using safe DOM methods (no innerHTML). */

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { parseItems, buildPrependLine, toggleLine, formatTimestamp } from "./CortexFile";
+import { parseItems, buildPrependLine, toggleLine, editLine, deleteLine, formatTimestamp } from "./CortexFile";
 
 describe("parseItems", () => {
   it("parses unchecked item", () => {
@@ -121,6 +121,85 @@ describe("toggleLine", () => {
   it("returns content unchanged for non-checkbox line", () => {
     const content = "# Header\n- [ ] item";
     expect(toggleLine(content, 0)).toBe(content);
+  });
+});
+
+describe("editLine", () => {
+  it("replaces text of an unchecked item", () => {
+    const result = editLine("- [ ] old text", 0, "new text");
+    expect(result).toBe("- [ ] new text");
+  });
+
+  it("replaces text of a checked item", () => {
+    const result = editLine("- [x] old text", 0, "new text");
+    expect(result).toBe("- [x] new text");
+  });
+
+  it("preserves image embeds when editing text", () => {
+    const result = editLine("- [ ] old text ![[img.png]]", 0, "new text");
+    expect(result).toBe("- [ ] new text ![[img.png]]");
+  });
+
+  it("preserves multiple image embeds", () => {
+    const result = editLine("- [ ] old ![[a.png]] ![[b.jpg]]", 0, "new");
+    expect(result).toBe("- [ ] new ![[a.png]] ![[b.jpg]]");
+  });
+
+  it("edits correct line by index", () => {
+    const result = editLine("- [ ] first\n- [ ] second\n- [ ] third", 1, "edited");
+    expect(result).toBe("- [ ] first\n- [ ] edited\n- [ ] third");
+  });
+
+  it("strips newlines from new text", () => {
+    const result = editLine("- [ ] old", 0, "line one\nline two");
+    expect(result).toBe("- [ ] line one line two");
+  });
+
+  it("preserves indentation", () => {
+    const result = editLine("  - [ ] indented", 0, "still indented");
+    expect(result).toBe("  - [ ] still indented");
+  });
+
+  it("returns content unchanged for invalid line index", () => {
+    const content = "- [ ] only line";
+    expect(editLine(content, 99, "new")).toBe(content);
+  });
+
+  it("returns content unchanged for non-checkbox line", () => {
+    const content = "# Header\n- [ ] item";
+    expect(editLine(content, 0, "new")).toBe(content);
+  });
+});
+
+describe("deleteLine", () => {
+  it("removes an unchecked item", () => {
+    const result = deleteLine("- [ ] first\n- [ ] second", 0);
+    expect(result).toBe("- [ ] second");
+  });
+
+  it("removes a checked item", () => {
+    const result = deleteLine("- [x] done\n- [ ] pending", 0);
+    expect(result).toBe("- [ ] pending");
+  });
+
+  it("removes correct line by index", () => {
+    const result = deleteLine("- [ ] first\n- [ ] second\n- [ ] third", 1);
+    expect(result).toBe("- [ ] first\n- [ ] third");
+  });
+
+  it("returns content unchanged for invalid line index", () => {
+    const content = "- [ ] only";
+    expect(deleteLine(content, 99)).toBe(content);
+  });
+
+  it("returns content unchanged for non-checkbox line", () => {
+    const content = "# Header\n- [ ] item";
+    expect(deleteLine(content, 0)).toBe(content);
+  });
+
+  it("handles removing the only line", () => {
+    const result = deleteLine("- [ ] solo", 0);
+    expect(result).toBe("");
   });
 });
 
